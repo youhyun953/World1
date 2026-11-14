@@ -76,6 +76,12 @@ export function formatFriendlyFirebaseError(error: unknown): {
   if (raw.includes('auth/popup-closed-by-user')) {
     return { message: 'Google 로그인 창이 닫혔습니다. 다시 시도해 주세요.' };
   }
+  if (raw.includes('auth/unauthorized-domain')) {
+    return {
+      message:
+        '현재 접속 도메인(예: github.io)이 Firebase 승인된 도메인에 아직 등록되지 않았습니다. Firebase Console → Authentication → Settings → 승인된 도메인에 현재 도메인을 추가해 주세요.',
+    };
+  }
   if (raw.includes('auth/operation-not-allowed')) {
     return {
       message:
