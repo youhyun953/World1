@@ -10,6 +10,7 @@ import {
   Sparkles,
   Trophy,
 } from 'lucide-react';
+import parisPostcardImg from '../assets/images/scene_paris_postcard_1794638626463.jpg';
 import { COUNTRIES_BY_ID, COUNTRIES_DATA } from '../data/countries';
 import { MISSIONS_DATA } from '../data/missions';
 import { updateTravelerNickname } from '../services/authService';
@@ -240,7 +241,7 @@ export function DashboardPage({
           <div className="sm:w-56 shrink-0 bg-sky-50 relative min-h-[180px]">
             {currentCountry.countryId === 'france' ? (
               <img
-                src="/src/assets/images/scene_paris_postcard_1794638626463.jpg"
+                src={parisPostcardImg}
                 alt="파리 센강과 에펠탑 일러스트"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"

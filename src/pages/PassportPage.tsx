@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, CheckCircle2, Lock, Stamp } from 'lucide-react';
+import passportBannerImg from '../assets/images/passport_desk_banner_1794638624919.jpg';
 import { COUNTRIES_BY_ID, COUNTRIES_DATA } from '../data/countries';
 import { getMissionsByCountry } from '../data/missions';
 import { fetchUserGameRecords } from '../services/gameService';
@@ -47,7 +48,7 @@ export function PassportPage({ profile, progress, onGoToCountry }: PassportPageP
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden grid grid-cols-1 md:grid-cols-12 items-stretch">
         <div className="md:col-span-5 min-h-[180px] bg-slate-100">
           <img
-            src="/src/assets/images/passport_desk_banner_1794638624919.jpg"
+            src={passportBannerImg}
             alt="여행자 여권과 도장 일러스트"
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover"

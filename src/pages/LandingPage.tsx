@@ -1,4 +1,6 @@
 import { ArrowRight, BookOpen, Brain, Compass, Globe2, LogIn, Map, UserPlus } from 'lucide-react';
+import compassEmblemImg from '../assets/images/traveler_compass_emblem_1794638625485.jpg';
+import heroWorldTravelImg from '../assets/images/hero_world_travel_1794638624819.jpg';
 import { AppView } from '../types/game';
 
 interface LandingPageProps {
@@ -24,7 +26,7 @@ export function LandingPage({
             <div className="space-y-5">
               <div className="flex items-center gap-3">
                 <img
-                  src="/src/assets/images/traveler_compass_emblem_1794638625485.jpg"
+                  src={compassEmblemImg}
                   alt="세계 여행자의 선택 나침반 엠블럼"
                   referrerPolicy="no-referrer"
                   className="w-11 h-11 rounded-full object-cover border border-slate-200"
@@ -95,7 +97,7 @@ export function LandingPage({
           {/* Right Illustration Column */}
           <div className="lg:col-span-6 rounded-2xl overflow-hidden border border-slate-200 bg-sky-50 relative min-h-[280px]">
             <img
-              src="/src/assets/images/hero_world_travel_1794638624819.jpg"
+              src={heroWorldTravelImg}
               alt="여행 일지, 나침반, 여권과 세계지도가 놓인 탐험가의 책상"
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover"

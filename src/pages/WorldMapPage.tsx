@@ -9,6 +9,7 @@ import {
   Settings2,
   Unlock,
 } from 'lucide-react';
+import parisPostcardImg from '../assets/images/scene_paris_postcard_1794638626463.jpg';
 import { COUNTRIES_BY_ID, COUNTRIES_DATA } from '../data/countries';
 import { getMissionsByCountry } from '../data/missions';
 import { selectCurrentCountry, toggleUnlockAllMode } from '../services/gameService';
@@ -257,7 +258,7 @@ export function WorldMapPage({
           {selectedCountry.countryId === 'france' && (
             <div className="h-44 overflow-hidden border-b border-slate-200">
               <img
-                src="/src/assets/images/scene_paris_postcard_1794638626463.jpg"
+                src={parisPostcardImg}
                 alt="프랑스 파리 풍경"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
