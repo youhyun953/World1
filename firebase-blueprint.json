@@ -1,0 +1,405 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Private traveler account profile and aggregated career stats",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "nickname": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30
+        },
+        "level": {
+          "type": "integer"
+        },
+        "experience": {
+          "type": "integer"
+        },
+        "totalScore": {
+          "type": "integer"
+        },
+        "visitedCountries": {
+          "type": "array"
+        },
+        "completedMissions": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "email",
+        "nickname",
+        "level",
+        "experience",
+        "totalScore",
+        "visitedCountries",
+        "completedMissions",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Country": {
+      "title": "Country",
+      "description": "Playable destination country metadata and geography overview",
+      "type": "object",
+      "properties": {
+        "countryId": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "countryName": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "continent": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "capital": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "flag": {
+          "type": "string",
+          "maxLength": 16
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 600
+        },
+        "climate": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "geography": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "landmarks": {
+          "type": "array"
+        },
+        "unlockCondition": {
+          "type": "string",
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "countryId",
+        "countryName",
+        "continent",
+        "capital",
+        "flag",
+        "description",
+        "climate",
+        "geography",
+        "landmarks",
+        "unlockCondition"
+      ]
+    },
+    "Mission": {
+      "title": "Mission",
+      "description": "Geography, psychology choice, or travel exploration mission",
+      "type": "object",
+      "properties": {
+        "missionId": {
+          "type": "string",
+          "maxLength": 80,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "countryId": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "missionType": {
+          "type": "string",
+          "enum": ["geography", "psychology", "exploration"]
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 800
+        },
+        "question": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "choices": {
+          "type": "array"
+        },
+        "correctAnswer": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "explanation": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "psychologyConcept": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "rewards": {
+          "type": "object"
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["쉬움", "보통", "도전"]
+        }
+      },
+      "required": [
+        "missionId",
+        "countryId",
+        "missionType",
+        "title",
+        "description",
+        "question",
+        "choices",
+        "explanation",
+        "rewards",
+        "difficulty"
+      ]
+    },
+    "GameRecord": {
+      "title": "GameRecord",
+      "description": "Immutable record of a completed mission and traveler decision",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "missionId": {
+          "type": "string",
+          "maxLength": 80,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "countryId": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "missionType": {
+          "type": "string",
+          "enum": ["geography", "psychology", "exploration"]
+        },
+        "missionTitle": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "selectedAnswer": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "result": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "scoreEarned": {
+          "type": "integer"
+        },
+        "experienceEarned": {
+          "type": "integer"
+        },
+        "budgetChange": {
+          "type": "integer"
+        },
+        "timeChange": {
+          "type": "integer"
+        },
+        "safetyChange": {
+          "type": "integer"
+        },
+        "satisfactionChange": {
+          "type": "integer"
+        },
+        "learnedConcept": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "playedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "missionId",
+        "countryId",
+        "missionType",
+        "missionTitle",
+        "selectedAnswer",
+        "result",
+        "scoreEarned",
+        "experienceEarned",
+        "budgetChange",
+        "timeChange",
+        "safetyChange",
+        "satisfactionChange",
+        "learnedConcept",
+        "playedAt"
+      ]
+    },
+    "TravelProgress": {
+      "title": "TravelProgress",
+      "description": "Current travel resources, unlocked destinations, and passport stamps",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "currentCountry": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "currentMission": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "unlockedCountries": {
+          "type": "array"
+        },
+        "visitedCountries": {
+          "type": "array"
+        },
+        "collectedStamps": {
+          "type": "array"
+        },
+        "completedMissionIds": {
+          "type": "array"
+        },
+        "totalBudget": {
+          "type": "integer"
+        },
+        "totalTravelTime": {
+          "type": "integer"
+        },
+        "safety": {
+          "type": "integer"
+        },
+        "satisfaction": {
+          "type": "integer"
+        },
+        "unlockAllMode": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "currentCountry",
+        "currentMission",
+        "unlockedCountries",
+        "visitedCountries",
+        "collectedStamps",
+        "completedMissionIds",
+        "totalBudget",
+        "totalTravelTime",
+        "safety",
+        "satisfaction",
+        "unlockAllMode",
+        "updatedAt"
+      ]
+    },
+    "Ranking": {
+      "title": "Ranking",
+      "description": "Public leaderboard summary without PII",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "nickname": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30
+        },
+        "totalScore": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "integer"
+        },
+        "visitedCountryCount": {
+          "type": "integer"
+        },
+        "completedMissionCount": {
+          "type": "integer"
+        },
+        "stampCount": {
+          "type": "integer"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "nickname",
+        "totalScore",
+        "level",
+        "visitedCountryCount",
+        "completedMissionCount",
+        "stampCount",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Private traveler profile document keyed by Firebase Auth UID"
+    },
+    "/countries/{countryId}": {
+      "schema": { "$ref": "#/entities/Country" },
+      "description": "Destination countries catalog"
+    },
+    "/missions/{missionId}": {
+      "schema": { "$ref": "#/entities/Mission" },
+      "description": "Playable travel missions catalog"
+    },
+    "/gameRecords/{recordId}": {
+      "schema": { "$ref": "#/entities/GameRecord" },
+      "description": "Per-mission completion records owned by userId"
+    },
+    "/travelProgress/{userId}": {
+      "schema": { "$ref": "#/entities/TravelProgress" },
+      "description": "Active travel resources, unlocked countries, and stamps keyed by UID"
+    },
+    "/rankings/{userId}": {
+      "schema": { "$ref": "#/entities/Ranking" },
+      "description": "Public leaderboard ranking entry keyed by UID (no PII)"
+    }
+  }
+}

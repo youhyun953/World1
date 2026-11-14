@@ -1,0 +1,296 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny all paths unless explicitly matched
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Reusable Hardened Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && (
+          request.auth.token.email == 'youhyun953@gmail.com'
+          || exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Blueprints ---
+
+    function isValidUser(data) {
+      return data.keys().hasAll([
+          'uid', 'email', 'nickname', 'level', 'experience',
+          'totalScore', 'visitedCountries', 'completedMissions',
+          'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'email', 'nickname', 'level', 'experience',
+          'totalScore', 'visitedCountries', 'completedMissions',
+          'createdAt', 'updatedAt'
+        ])
+        && data.uid is string && data.uid == request.auth.uid && data.uid.size() <= 128
+        && data.email is string && data.email.size() <= 200
+        && data.nickname is string && data.nickname.size() >= 1 && data.nickname.size() <= 30
+        && data.level is int && data.level >= 1 && data.level <= 99
+        && data.experience is int && data.experience >= 0 && data.experience <= 10000000
+        && data.totalScore is int && data.totalScore >= 0 && data.totalScore <= 10000000
+        && data.visitedCountries is list && data.visitedCountries.size() <= 20
+        && data.completedMissions is int && data.completedMissions >= 0 && data.completedMissions <= 500
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidTravelProgress(data) {
+      return data.keys().hasAll([
+          'userId', 'currentCountry', 'currentMission',
+          'unlockedCountries', 'visitedCountries', 'collectedStamps',
+          'completedMissionIds', 'totalBudget', 'totalTravelTime',
+          'safety', 'satisfaction', 'unlockAllMode', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'userId', 'currentCountry', 'currentMission',
+          'unlockedCountries', 'visitedCountries', 'collectedStamps',
+          'completedMissionIds', 'totalBudget', 'totalTravelTime',
+          'safety', 'satisfaction', 'unlockAllMode', 'updatedAt'
+        ])
+        && data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128
+        && data.currentCountry is string && data.currentCountry.size() <= 64
+        && data.currentMission is string && data.currentMission.size() <= 80
+        && data.unlockedCountries is list && data.unlockedCountries.size() <= 20
+        && data.visitedCountries is list && data.visitedCountries.size() <= 20
+        && data.collectedStamps is list && data.collectedStamps.size() <= 20
+        && data.completedMissionIds is list && data.completedMissionIds.size() <= 150
+        && data.totalBudget is int && data.totalBudget >= 0 && data.totalBudget <= 10000
+        && data.totalTravelTime is int && data.totalTravelTime >= 0 && data.totalTravelTime <= 500
+        && data.safety is int && data.safety >= 0 && data.safety <= 100
+        && data.satisfaction is int && data.satisfaction >= 0 && data.satisfaction <= 100
+        && data.unlockAllMode is bool
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidGameRecord(data) {
+      return data.keys().hasAll([
+          'userId', 'missionId', 'countryId', 'missionType',
+          'missionTitle', 'selectedAnswer', 'result',
+          'scoreEarned', 'experienceEarned', 'budgetChange',
+          'timeChange', 'safetyChange', 'satisfactionChange',
+          'learnedConcept', 'playedAt'
+        ])
+        && data.keys().hasOnly([
+          'userId', 'missionId', 'countryId', 'missionType',
+          'missionTitle', 'selectedAnswer', 'result',
+          'scoreEarned', 'experienceEarned', 'budgetChange',
+          'timeChange', 'safetyChange', 'satisfactionChange',
+          'learnedConcept', 'playedAt'
+        ])
+        && data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128
+        && isValidId(data.missionId)
+        && isValidId(data.countryId)
+        && data.missionType in ['geography', 'psychology', 'exploration']
+        && data.missionTitle is string && data.missionTitle.size() >= 1 && data.missionTitle.size() <= 160
+        && data.selectedAnswer is string && data.selectedAnswer.size() >= 1 && data.selectedAnswer.size() <= 300
+        && data.result is string && data.result.size() >= 1 && data.result.size() <= 120
+        && data.scoreEarned is int && data.scoreEarned >= 0 && data.scoreEarned <= 500
+        && data.experienceEarned is int && data.experienceEarned >= 0 && data.experienceEarned <= 500
+        && data.budgetChange is int && data.budgetChange >= -1000 && data.budgetChange <= 1000
+        && data.timeChange is int && data.timeChange >= -100 && data.timeChange <= 100
+        && data.safetyChange is int && data.safetyChange >= -100 && data.safetyChange <= 100
+        && data.satisfactionChange is int && data.satisfactionChange >= -100 && data.satisfactionChange <= 100
+        && data.learnedConcept is string && data.learnedConcept.size() <= 200
+        && data.playedAt is timestamp;
+    }
+
+    function isValidRanking(data) {
+      return data.keys().hasAll([
+          'userId', 'nickname', 'totalScore', 'level',
+          'visitedCountryCount', 'completedMissionCount',
+          'stampCount', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'userId', 'nickname', 'totalScore', 'level',
+          'visitedCountryCount', 'completedMissionCount',
+          'stampCount', 'updatedAt'
+        ])
+        && data.userId is string && data.userId == request.auth.uid && data.userId.size() <= 128
+        && data.nickname is string && data.nickname.size() >= 1 && data.nickname.size() <= 30
+        && data.totalScore is int && data.totalScore >= 0 && data.totalScore <= 10000000
+        && data.level is int && data.level >= 1 && data.level <= 99
+        && data.visitedCountryCount is int && data.visitedCountryCount >= 0 && data.visitedCountryCount <= 20
+        && data.completedMissionCount is int && data.completedMissionCount >= 0 && data.completedMissionCount <= 500
+        && data.stampCount is int && data.stampCount >= 0 && data.stampCount <= 20
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidCountry(data) {
+      return data.keys().hasAll([
+          'countryId', 'countryName', 'continent', 'capital',
+          'flag', 'description', 'climate', 'geography',
+          'landmarks', 'unlockCondition'
+        ])
+        && data.keys().hasOnly([
+          'countryId', 'countryName', 'continent', 'capital',
+          'flag', 'description', 'climate', 'geography',
+          'landmarks', 'unlockCondition'
+        ])
+        && isValidId(data.countryId)
+        && data.countryName is string && data.countryName.size() <= 80
+        && data.continent is string && data.continent.size() <= 40
+        && data.capital is string && data.capital.size() <= 80
+        && data.flag is string && data.flag.size() <= 16
+        && data.description is string && data.description.size() <= 600
+        && data.climate is string && data.climate.size() <= 300
+        && data.geography is string && data.geography.size() <= 400
+        && data.landmarks is list && data.landmarks.size() <= 10
+        && data.unlockCondition is string && data.unlockCondition.size() <= 200;
+    }
+
+    function isValidMission(data) {
+      return data.keys().hasAll([
+          'missionId', 'countryId', 'missionType', 'title',
+          'description', 'question', 'choices', 'explanation',
+          'rewards', 'difficulty'
+        ])
+        && data.keys().hasOnly([
+          'missionId', 'countryId', 'missionType', 'title',
+          'description', 'question', 'choices', 'correctAnswer',
+          'explanation', 'psychologyConcept', 'rewards', 'difficulty'
+        ])
+        && isValidId(data.missionId)
+        && isValidId(data.countryId)
+        && data.missionType in ['geography', 'psychology', 'exploration']
+        && data.title is string && data.title.size() <= 160
+        && data.description is string && data.description.size() <= 800
+        && data.question is string && data.question.size() <= 500
+        && data.choices is list && data.choices.size() <= 10
+        && data.explanation is string && data.explanation.size() <= 1000
+        && data.rewards is map
+        && data.difficulty in ['쉬움', '보통', '도전'];
+    }
+
+    // --- Collection Rules ---
+
+    // Private User Profile (PII protected: owner-only get/create/update, no list)
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if false;
+      allow create: if isValidId(userId) && isOwner(userId) && isValidUser(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && incoming().totalScore == 0
+        && incoming().experience == 0
+        && incoming().level == 1
+        && incoming().completedMissions == 0;
+      allow update: if isValidId(userId) && isOwner(userId) && isValidUser(incoming())
+        && incoming().uid == existing().uid
+        && incoming().email == existing().email
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Action: Update Nickname
+          incoming().diff(existing()).affectedKeys().hasOnly(['nickname', 'updatedAt'])
+          // Action: Record Mission Progress
+          || (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'level', 'experience', 'totalScore', 'visitedCountries', 'completedMissions', 'updatedAt'
+            ])
+            && incoming().totalScore >= existing().totalScore
+            && incoming().experience >= existing().experience
+            && incoming().completedMissions >= existing().completedMissions
+          )
+        );
+      allow delete: if false;
+    }
+
+    // Active Travel Progress (owner-only)
+    match /travelProgress/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if false;
+      allow create: if isValidId(userId) && isOwner(userId) && isValidTravelProgress(incoming())
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId) && isOwner(userId) && isValidTravelProgress(incoming())
+        && incoming().userId == existing().userId
+        && incoming().updatedAt == request.time
+        && (
+          // Action: Select Current Destination
+          incoming().diff(existing()).affectedKeys().hasOnly(['currentCountry', 'currentMission', 'updatedAt'])
+          // Action: Toggle Unlock Setting
+          || incoming().diff(existing()).affectedKeys().hasOnly(['unlockAllMode', 'updatedAt'])
+          // Action: Complete Mission & Update Resources
+          || incoming().diff(existing()).affectedKeys().hasOnly([
+            'currentCountry', 'currentMission', 'unlockedCountries', 'visitedCountries',
+            'collectedStamps', 'completedMissionIds', 'totalBudget', 'totalTravelTime',
+            'safety', 'satisfaction', 'updatedAt'
+          ])
+          // Action: Replenish/Reset Resources for New Expedition
+          || incoming().diff(existing()).affectedKeys().hasOnly([
+            'totalBudget', 'totalTravelTime', 'safety', 'satisfaction', 'updatedAt'
+          ])
+        );
+      allow delete: if false;
+    }
+
+    // Immutable Game Records (owner-only read/list/create)
+    match /gameRecords/{recordId} {
+      allow get: if isValidId(recordId) && isSignedIn() && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isValidId(recordId) && isSignedIn() && isValidGameRecord(incoming())
+        && incoming().playedAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // Public Leaderboard (zero PII)
+    match /rankings/{userId} {
+      allow get: if isValidId(userId);
+      allow list: if resource.data.totalScore >= 0;
+      allow create: if isValidId(userId) && isOwner(userId) && isValidRanking(incoming())
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId) && isOwner(userId) && isValidRanking(incoming())
+        && incoming().userId == existing().userId
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'nickname', 'totalScore', 'level', 'visitedCountryCount',
+          'completedMissionCount', 'stampCount', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    // Public Game Catalog: Countries
+    match /countries/{countryId} {
+      allow get: if isValidId(countryId);
+      allow list: if resource.data.countryId is string;
+      allow create: if isValidId(countryId) && isSignedIn() && isValidCountry(incoming());
+      allow update, delete: if isAdmin();
+    }
+
+    // Public Game Catalog: Missions
+    match /missions/{missionId} {
+      allow get: if isValidId(missionId);
+      allow list: if resource.data.missionId is string;
+      allow create: if isValidId(missionId) && isSignedIn() && isValidMission(incoming());
+      allow update, delete: if isAdmin();
+    }
+  }
+}
